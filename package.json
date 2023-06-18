@@ -1,0 +1,33 @@
+{
+  "name": "wechat-gpt-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "server": "node  --loader ts-node/esm --inspect ./src/server.ts"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "chatgpt",
+    "wechat"
+  ],
+  "author": "reai",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^18.11.11",
+    "@waylaidwanderer/chatgpt-api": "^1.33.1",
+    "axios": "^1.4.0",
+    "dotenv": "^16.1.4",
+    "inquirer": "^9.2.7",
+    "koa": "^2.14.2",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^12.0.0",
+    "koa-xml-body": "^3.0.0",
+    "koa2-cors": "^2.0.6",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.3"
+  },
+  "description": ""
+}
