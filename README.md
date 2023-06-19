@@ -19,6 +19,6 @@ npm run server
 > WECHAT_APP_SECRET=
 
 ### 说明
-1、进入公众号平台找到自己的appId 和 appSecret， 填入.env文件中
-2、在.env文件中填写你的OPEN_AI_API_KEY
-3、运行项目
+> 1、进入公众号平台找到自己的appId 和 appSecret， 填入.env文件中
+> 2、在.env文件中填写你的OPEN_AI_API_KEY
+> 3、运行项目
