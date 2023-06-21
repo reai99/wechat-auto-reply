@@ -4,40 +4,207 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="http://cdn.suoluomei.com/common/js2.0/axios/axios.min.js"></script>
-    <title>Document</title>
+    <title>CHATGPT-在线网站</title>
     <style>
       * {
         background-color: #000;
         padding: 0;
       }
-      .content-container {
+      #chat-container pre {
         color: rgba(255, 255, 255, 0.95);
+        white-space: normal;
+        word-break: normal;
+        font-size: 14px;
+      }
+      #chat-introduce {
+        color: burlywood;
+        padding: 10px;
+        border: 1px solid;
+        margin-bottom: 10px;
+        font-size: 12px;
+        border-radius: 4px;
+        text-align: center;
+      }
+      #chat-introduce .introduce-tip{
+        padding: 5px 0;
+      }
+      #introduce-tool-clear {
+        color: seagreen;
+        cursor: pointer;
+        display: inline-block;
+        padding: 0 10px;
+      }
+      #introduce-tool-reset {
+        color: red;
+        cursor: pointer;
+        display: inline-block;
+        padding: 0 10px;
+      }
+      .danger {
+        color: red;
+      }
+      .danger span {
+        color: blue;
       }
       .extarea {
-        color: rgba(255, 255, 255, 0.95);
+        color: deepskyblue;
         border: none;
         outline: 0;
         resize: both;
-        font-size: 13px;
+        font-weight: 600;
+        font-size: 14px;
       }
     </style>
     <script>
-      console.log(axios)
-      function inputKeyDown(e) {
-        if(e.keyCode === 13){
-          const value = (e.target.textContent || '').trim();
-          console.log(value)
-        }
+      let pass = 'gpt';
+      const replyPrefix = "[CHATGPT]:";
+      const history = {
+        question: [],
+        current: -1,
+      };
+      let input = null;
+
+      function getLocalToken() {
+        return window.localStorage.getItem('chat_temp_uuid');
       }
-      window.onload = function() {
-        document.addEventListener('keydown', inputKeyDown, false);
+
+      function setLocalToken(val) {
+        window.localStorage.setItem('chat_temp_uuid', val);
+      }
+
+      // 30分钟有效
+      function verifyToken(token) {
+        return Math.floor(+new Date() / 1000) - Math.floor(Number(token) / 1000 ) < 1800
+      }
+      const token = getLocalToken();
+      
+      if(!verifyToken(token)) {
+        input = prompt("访问密码：", "");
+      } else {
+        input = 'gpt';
+      }
+
+      if ((input|| '').trim() === pass) {
+
+        let uuid = getUuid();
+
+        setLocalToken(uuid);
+
+        function getUuid() {
+          return +new Date() + '';
+        }
+
+        function scrollToBottom() {
+          window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function inputFocus() {
+          const input = document.getElementById("input");
+          input && input.focus();
+        }
+
+        function inputStepHistory(dir = 1) {
+          const step = history.current + dir;
+          if(step < 0 || step > history.question.length) return;
+          const value = history.question[step] || '';
+          const input = document.getElementById("input");
+          if(input) input.innerText = value;
+          history.current = step;
+        }
+
+        function handleClear(e) {
+          e.stopPropagation();
+          const historyContainer = document.getElementById("chat-history-container");
+          historyContainer && (historyContainer.innerHTML = "");
+          inputFocus();
+        }
+
+        function handleReset(e) {
+          e.stopPropagation();
+          uuid = getUuid();
+          handleClear(e);
+        }
+
+        function chatgptReply(value) {
+          const xhr = new XMLHttpRequest();
+          const container = document.getElementById('chat-container');
+          const historyContainer = document.getElementById("chat-history-container");
+          const pre = document.createElement("pre");
+          const input = document.getElementById("input");
+          const newInput = input.cloneNode();
+          input.removeAttribute('id')
+          input.removeAttribute("contentEditable");
+          historyContainer.appendChild(input);
+          historyContainer.appendChild(pre);
+          pre.innerText = '...';
+          xhr.responseType = "stream";
+          xhr.onreadystatechange = () => {
+              scrollToBottom();
+              if (xhr.readyState === XMLHttpRequest.LOADING) {
+                pre.innerText = replyPrefix + xhr.response;
+              } else if (xhr.readyState === XMLHttpRequest.DONE) {
+                if((pre.innerText || '').trim() === "...") {
+                  pre.innerText = replyPrefix + '没有明白你的意思，请稍后重试';
+                }
+                container.appendChild(newInput);
+                newInput.focus();
+              }
+            };
+            xhr.open("GET", `/stream/reply?q=${value}&uuid=${uuid}`);
+            xhr.send();
+        }
+
+        function inputKeyDown(e) {
+          switch(e.keyCode) {
+            case 13: {
+              const value = (e.target.textContent || "").trim();
+              if (!value) return;
+              history.question.push(value);
+
+              history.current = history.question.length
+              chatgptReply(value);
+            };
+            break;
+            case 38: 
+              inputStepHistory(-1);
+            break;
+            case 40: 
+              inputStepHistory(1);
+            default: break;
+          }
+        }
+
+        window.onload = function () {
+          inputFocus();
+          const reset = document.getElementById('introduce-tool-reset');
+          const clear = document.getElementById('introduce-tool-clear');
+          document.addEventListener("keydown", inputKeyDown, false);
+          document.addEventListener("click", inputFocus, false);
+          reset.addEventListener("click", handleReset, false);
+          clear.addEventListener("click", handleClear, false)
+        };
+
+      } else {
+        pass = undefined;
+        window.onload = function () {
+          const introduce = document.getElementById('chat-introduce');
+          introduce.innerHTML= "<span class='danger'>密码校验失败，请输入访问的密码！！！</span><a href='./'>立即刷新</a>"
+        };
       }
     </script>
   </head>
   <body>
-    <div class="content-container">
-      <div class="extarea" contenteditable="true" focus="true" onkeydown="inputKeyDown"></div>
+    <div id="chat-container">
+      <div id="chat-introduce">
+        直接输入问题即可开始和CHATGPT的聊天之旅🤖️～
+        <div class="introduce-tip">（💡注意：聊天不会产生记录，刷新即可清除记录）</div>
+        <div class="introduce-tool">
+          <span id="introduce-tool-clear">清屏</span>
+          <span id="introduce-tool-reset">重置会话</span>
+        </div>
+      </div>
+      <div id="chat-history-container"></div>
+      <div id="input" class="extarea" contenteditable="true" ></div>
     </div>
   </body>
 </html>

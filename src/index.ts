@@ -9,11 +9,15 @@ import ChatGpt from "./lib/chatgpt.js";
 import { request } from './utils/http.js';
 import path from 'path';
 import views from "koa-views";
+import { fileURLToPath } from 'url';
 
 
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const APPID = process.env.WECHAT_APP_ID;
 const APPSECRET = process.env.WECHAT_APP_SECRET;
@@ -140,11 +144,10 @@ router.post("/api/wx/reply", async (ctx) => {
 
 // 流式输出方式
 router.get("/stream/reply", (ctx) => {
-  const { q } = ctx.query;
+  const { q, uuid } = ctx.query;
 
   ctx.set({
     'Connection': 'keep-alive',
-    'Cache-Control': 'no-cache',
     'Content-Type': 'text/event-stream; charset=utf-8',
   });
 
@@ -153,7 +156,7 @@ router.get("/stream/reply", (ctx) => {
   ctx.body = stream;
   ctx.status = 200;
 
-  chatGptClient.sendMessageToChatGpt(q, { id: 'test-chatgpt' }, (txt) => {
+  chatGptClient.sendMessageToChatGpt(q, { id: uuid }, (txt) => {
     stream.write(txt); 
   }).then(res => {
     stream.end();
@@ -163,12 +166,6 @@ router.get("/stream/reply", (ctx) => {
 
 })
 
-// router.get('/cs/*', async function (ctx) {
-//   await ctx.render('index', { 
-//     title: '测试项目',
-//   });
-// });
-
 // 页面访问
 router.get('/(.*)', async function (ctx) {
   await ctx.render('index', { 
@@ -176,7 +173,8 @@ router.get('/(.*)', async function (ctx) {
   });
 });
 
-app.use(views('/Users/reai/Desktop/测试项目/wechat-auto-reply/src/public/', {
+
+app.use(views(path.join(__dirname, 'public'), {
   map: { html: 'swig' }
 }));
 
