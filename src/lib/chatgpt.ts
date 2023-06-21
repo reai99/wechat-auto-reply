@@ -48,19 +48,22 @@ export default class ChatGpt {
     this.chatOption = {};
   }
 
-  getChatGptReply = async (content: any, contactId: string) => {
+  getChatGptReply = async (content: any, contactId: string, onProgress: any) => {
     const data = await this.chatGPT.sendMessage(
       content,
-      this.chatOption[contactId]
+      {
+        ...this.chatOption[contactId],
+        onProgress,
+      }
     );
     const { response, conversationId, messageId } =  data;
     this.chatOption[contactId] = { conversationId, parentMessageId: messageId };
     return response;
   }
 
-  sendMessageToChatGpt = async (content: any, contact: any) => {
+  sendMessageToChatGpt = async (content: any, contact: any, onProgress: any) => {
     const { id: contactId } = contact || {};
-    const reply = await this.getChatGptReply(content, contactId);
+    const reply = await this.getChatGptReply(content, contactId, onProgress);
     return reply;
   }
 

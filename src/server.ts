@@ -1,13 +1,16 @@
 import Koa from "koa";
 import route from "koa-router";
 import cors from 'koa2-cors';
+import { PassThrough } from 'stream';
 import crypto from "crypto";
 import bodyParser from "koa-bodyparser";
 import xmlParser from "./middleware/koaXmlParser.js";
 import ChatGpt from "./lib/chatgpt.js";
 import { request } from './utils/http.js';
+import fs from 'fs';
 
 import dotenv from 'dotenv';
+import path from "path";
 
 dotenv.config();
 
@@ -134,7 +137,50 @@ router.post("/api/wx/reply", async (ctx) => {
   }
 });
 
+// 发送消息
+const sendMessage = async (stream) => {
+  const data = [
+    '现在科学技术的发展速度叫人惊叹',
+    '同样在数码相机的技术创新上',
+    '随着数码相机越来越普及',
+    '数码相机现已成为大家生活中不可缺少的电子产品',
+    '而正是因为这样，技术的创新也显得尤为重要',
+  ].map(c => c.split("")).flat(10);
 
+  // 循环上面数组: 推送数据、休眠 2 秒
+  for (const value of data) {
+    stream.write(`${value}`); // 写入数据(推送数据)
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  // 结束流
+  stream.end();
+};
+
+// 流式输出方式
+router.get("/stream/reply", (ctx) => {
+  const { q } = ctx.query;
+
+  ctx.set({
+    'Connection': 'keep-alive',
+    'Cache-Control': 'no-cache',
+    'Content-Type': 'text/event-stream; charset=utf-8',
+  });
+
+  const stream = new PassThrough(); 
+
+  ctx.body = stream;
+  ctx.status = 200;
+
+  chatGptClient.sendMessageToChatGpt(q, { id: 'test-chatgpt' }, (txt) => {
+    stream.write(txt); 
+  }).then(res => {
+    stream.end();
+  }).catch(err => {
+    stream.end();
+  })
+
+})
 
 app
   .use(xmlParser())
