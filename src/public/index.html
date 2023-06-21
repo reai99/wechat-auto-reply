@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="http://cdn.suoluomei.com/common/js2.0/axios/axios.min.js"></script>
+    <title>Document</title>
+    <style>
+      * {
+        background-color: #000;
+        padding: 0;
+      }
+      .content-container {
+        color: rgba(255, 255, 255, 0.95);
+      }
+      .extarea {
+        color: rgba(255, 255, 255, 0.95);
+        border: none;
+        outline: 0;
+        resize: both;
+        font-size: 13px;
+      }
+    </style>
+    <script>
+      console.log(axios)
+      function inputKeyDown(e) {
+        if(e.keyCode === 13){
+          const value = (e.target.textContent || '').trim();
+          console.log(value)
+        }
+      }
+      window.onload = function() {
+        document.addEventListener('keydown', inputKeyDown, false);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="content-container">
+      <div class="extarea" contenteditable="true" focus="true" onkeydown="inputKeyDown"></div>
+    </div>
+  </body>
+</html>

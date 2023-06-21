@@ -7,10 +7,11 @@ import bodyParser from "koa-bodyparser";
 import xmlParser from "./middleware/koaXmlParser.js";
 import ChatGpt from "./lib/chatgpt.js";
 import { request } from './utils/http.js';
-import fs from 'fs';
+import path from 'path';
+import views from "koa-views";
+
 
 import dotenv from 'dotenv';
-import path from "path";
 
 dotenv.config();
 
@@ -137,26 +138,6 @@ router.post("/api/wx/reply", async (ctx) => {
   }
 });
 
-// 发送消息
-const sendMessage = async (stream) => {
-  const data = [
-    '现在科学技术的发展速度叫人惊叹',
-    '同样在数码相机的技术创新上',
-    '随着数码相机越来越普及',
-    '数码相机现已成为大家生活中不可缺少的电子产品',
-    '而正是因为这样，技术的创新也显得尤为重要',
-  ].map(c => c.split("")).flat(10);
-
-  // 循环上面数组: 推送数据、休眠 2 秒
-  for (const value of data) {
-    stream.write(`${value}`); // 写入数据(推送数据)
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-
-  // 结束流
-  stream.end();
-};
-
 // 流式输出方式
 router.get("/stream/reply", (ctx) => {
   const { q } = ctx.query;
@@ -182,9 +163,26 @@ router.get("/stream/reply", (ctx) => {
 
 })
 
+// router.get('/cs/*', async function (ctx) {
+//   await ctx.render('index', { 
+//     title: '测试项目',
+//   });
+// });
+
+// 页面访问
+router.get('/(.*)', async function (ctx) {
+  await ctx.render('index', { 
+    title: '测试项目',
+  });
+});
+
+app.use(views('/Users/reai/Desktop/测试项目/wechat-auto-reply/src/public/', {
+  map: { html: 'swig' }
+}));
+
 app
   .use(xmlParser())
   .use(router.routes())
   .use(router.allowedMethods());
-app.listen(80);
-console.log("Server listen in:" + 80);
+app.listen(3004);
+console.log("Server listen in:" + 3004);
