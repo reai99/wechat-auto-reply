@@ -10,7 +10,7 @@ import { request } from './utils/http.js';
 import path from 'path';
 import views from "koa-views";
 import { fileURLToPath } from 'url';
-
+import prompt from "./prompt/index.js";
 
 import dotenv from 'dotenv';
 
@@ -141,6 +141,21 @@ router.post("/api/wx/reply", async (ctx) => {
     });
   }
 });
+
+// 初始化prompt
+router.get("/init/prompt", async (ctx) => {
+  const { uuid } = ctx.query;
+  const promptStr = prompt.map((msg, index) => `${index + 1}、${msg}`).join('\n');
+  try {
+    await chatGptClient.sendMessageToChatGpt(promptStr, { id: uuid })
+    ctx.status = 200;
+    ctx.body = { code: 0, msg : null };
+  } catch (error) {
+    ctx.status = 200;
+    ctx.body = { code: -1, msg : '初始化prompt失败' };
+  }
+
+})
 
 // 流式输出方式
 router.get("/stream/reply", (ctx) => {

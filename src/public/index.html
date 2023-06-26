@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
     <title>CHATGPT-在线网站</title>
     <style>
       * {
@@ -16,7 +20,22 @@
         white-space: normal;
         word-break: normal;
         font-size: 14px;
+        background-color: #000;
       }
+      #chat-container img {
+        max-width: 80%;
+        max-height: 300px;
+      }
+
+      #chat-container pre code {
+        color: tan;
+        text-shadow: none;
+        font-size: 14px;
+      }
+      #chat-container pre code .operator{
+        background: transparent!important;
+      }
+
       #chat-introduce {
         color: burlywood;
         padding: 10px;
@@ -56,7 +75,7 @@
         font-size: 14px;
       }
     </style>
-    <script>
+    <script id="main-script">
       let pass = 'gpt', uuid = null;
       const replyPrefix = "[CHATGPT]:";
       const history = {
@@ -88,6 +107,8 @@
       if ((input|| '').trim() === pass) {
 
         uuid = getUuid();
+
+        initChatgpt();
 
         setLocalToken(uuid);
 
@@ -126,6 +147,17 @@
           handleClear(e);
         }
 
+        async function initChatgpt() {
+          const xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+              // 待处理响应
+            }
+          }
+          xhr.open("GET", `/init/prompt?uuid=${uuid}`);
+          xhr.send();
+        }
+
         function chatgptReply(value) {
           const xhr = new XMLHttpRequest();
           const container = document.getElementById('chat-container');
@@ -142,7 +174,8 @@
           xhr.onreadystatechange = () => {
               scrollToBottom();
               if (xhr.readyState === XMLHttpRequest.LOADING) {
-                pre.innerText = replyPrefix + xhr.response;
+                pre.innerHTML = replyPrefix + marked.marked(xhr.response), { sanitize: false };
+                Prism.highlightAll();
               } else if (xhr.readyState === XMLHttpRequest.DONE) {
                 if((pre.innerText || '').trim() === "...") {
                   pre.innerText = replyPrefix + '没有明白你的意思，请稍后重试';
@@ -187,6 +220,8 @@
 
       } else {
         pass = undefined;
+        const script = document.getElementById('main-script');
+        script.remove();
         window.onload = function () {
           const introduce = document.getElementById('chat-introduce');
           introduce.innerHTML= "<span class='danger'>密码校验失败，请输入访问的密码！！！</span><a href='./'>立即刷新</a>"
