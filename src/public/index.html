@@ -25,13 +25,15 @@
         background: rgba(255, 255,255, 0.1);
         position: relative;
         border-radius: 4px;
+        padding-top: 10px;
+        padding-bottom: 10px;
       }
       #chat-container .chat-code-copy{
         position: absolute;
         right: 0;
         font-size: 12px;
         top: 0;
-        padding: 4px 10px;
+        padding: 2px 10px;
         border-radius: 2px 0 0 2px;
         cursor: pointer;
         font-weight: 400;
@@ -196,8 +198,16 @@
             createCopy.onclick = function(e) {
               e.stopPropagation();
               const code =  codeList[i].querySelector('code');
-              navigator.clipboard.writeText(code.innerText);
-            }
+              var textarea = document.createElement('textarea');
+              textarea.value = code.innerText;
+              textarea.setAttribute('readonly', '');
+              textarea.style.position = 'absolute';
+              textarea.style.left = '-9999px';
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textarea);
+           }
             codeList[i].appendChild(createCopy);
           }
         }
