@@ -4,10 +4,9 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.bootcss.com/marked/5.0.0/marked.min.js"></script>
+    <script src="./prism.js"></script>
+    <link rel="stylesheet" href="./prism.css">
     <title>CHATGPT-在线网站</title>
     <style>
       * {
@@ -78,10 +77,7 @@
     <script id="main-script">
       let pass = 'gpt', uuid = null;
       const replyPrefix = "[CHATGPT]:";
-      const history = {
-        question: [],
-        current: -1,
-      };
+      const history = {  question: [], current: -1, };
       let input = null;
 
       function getLocalToken() {
@@ -174,7 +170,7 @@
           xhr.onreadystatechange = () => {
               scrollToBottom();
               if (xhr.readyState === XMLHttpRequest.LOADING) {
-                pre.innerHTML = replyPrefix + marked.marked(xhr.response), { sanitize: false };
+                pre.innerHTML = replyPrefix + marked.marked(xhr.response);
                 Prism.highlightAll();
               } else if (xhr.readyState === XMLHttpRequest.DONE) {
                 if((pre.innerText || '').trim() === "...") {

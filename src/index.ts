@@ -1,6 +1,7 @@
 import Koa from "koa";
 import route from "koa-router";
 import cors from 'koa2-cors';
+import serveStatic from 'koa-static';
 import { PassThrough } from 'stream';
 import crypto from "crypto";
 import bodyParser from "koa-bodyparser";
@@ -193,9 +194,11 @@ app.use(views(path.join(__dirname, 'public'), {
   map: { html: 'swig' }
 }));
 
+app.use(serveStatic(__dirname + '/public'))
+
 app
   .use(xmlParser())
   .use(router.routes())
   .use(router.allowedMethods());
-app.listen(3004);
-console.log("Server listen in:" + 3004);
+app.listen(80);
+console.log("Server listen in:" + 80);
